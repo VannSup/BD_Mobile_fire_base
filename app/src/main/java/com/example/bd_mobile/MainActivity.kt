@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun retrieveData() {
-        taskReference.addListenerForSingleValueEvent(object : ValueEventListener {
+        taskReference.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
                 Log.d("FirebaseError", error.message)
             }
@@ -164,8 +164,6 @@ class MainActivity : AppCompatActivity() {
                             adapter.addItem(it2)
                         }
                 }
-                positiveButton(R.string.add)
-                title(R.string.add_title)
             }
         }
     }
