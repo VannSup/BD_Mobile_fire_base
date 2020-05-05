@@ -1,4 +1,4 @@
-package com.example.bd_mobile
+package com.example.bd_mobile.data.model
 
 data class Task(
     val firebaseId: String = "",

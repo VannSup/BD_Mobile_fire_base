@@ -1,8 +1,12 @@
-package com.example.bd_mobile
+package com.example.bd_mobile.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.bd_mobile.R
+import com.example.bd_mobile.data.model.Task
+import com.example.bd_mobile.ui.widget.holder.TaskViewHolder
+import java.util.*
 
 class TaskAdapter : RecyclerView.Adapter<TaskViewHolder>() {
 
@@ -12,8 +16,10 @@ class TaskAdapter : RecyclerView.Adapter<TaskViewHolder>() {
     private var sortMode = 0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
-        return TaskViewHolder(LayoutInflater.from(parent.context)
-            .inflate(R.layout.task_holder, parent, false))
+        return TaskViewHolder(
+            LayoutInflater.from(parent.context)
+                .inflate(R.layout.task_holder, parent, false)
+        )
     }
 
     override fun getItemCount(): Int {
@@ -25,6 +31,25 @@ class TaskAdapter : RecyclerView.Adapter<TaskViewHolder>() {
         holder.bindData(taskDetail, position, onTaskClickListener, onLongTaskClickListener)
     }
 
+    fun addItem(task: Task) {
+        this.taskList.add(task)
+        notifyItemChanged(this.taskList.lastIndex)
+    }
+
+    fun removeAt(position: Int) {
+        this.taskList.removeAt(position)
+        notifyItemRemoved(position)
+    }
+
+    fun getTaskAt(position: Int): Task {
+        return this.taskList[position]
+    }
+
+    fun search(searchRequest: String) {
+        setTaskList(this.taskList.filter { it.name.contains(searchRequest) })
+    }
+
+    // region sort
     fun setTaskList(taskList: List<Task>) {
         this.taskList.clear()
         this.taskList.addAll(taskList)
@@ -38,7 +63,7 @@ class TaskAdapter : RecyclerView.Adapter<TaskViewHolder>() {
     }
 
     fun sortListByName() {
-        this.taskList.sortBy { it.name.toUpperCase() }
+        this.taskList.sortBy { it.name.toUpperCase(Locale.getDefault()) }
         notifyDataSetChanged()
         sortMode = 1
     }
@@ -60,19 +85,6 @@ class TaskAdapter : RecyclerView.Adapter<TaskViewHolder>() {
         notifyDataSetChanged()
         sortMode = 4
     }
-
-    fun addItem(task: Task) {
-        this.taskList.add(task)
-        notifyItemChanged(this.taskList.lastIndex)
-    }
-
-    fun removeAt(position: Int) {
-        this.taskList.removeAt(position)
-        notifyItemRemoved(position)
-    }
-
-    fun getTaskAt(position: Int): Task {
-        return this.taskList[position]
-    }
+    // endregion
 
 }

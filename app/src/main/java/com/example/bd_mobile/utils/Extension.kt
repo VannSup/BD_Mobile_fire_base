@@ -1,4 +1,4 @@
-package com.example.bd_mobile
+package com.example.bd_mobile.utils
 
 import android.view.View
 

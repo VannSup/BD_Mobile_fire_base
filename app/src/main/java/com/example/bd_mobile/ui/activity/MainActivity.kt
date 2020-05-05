@@ -1,9 +1,10 @@
-package com.example.bd_mobile
+package com.example.bd_mobile.ui.activity
 
+import android.app.SearchManager
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
+import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,13 +20,22 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.activity_main.*
+import android.widget.ImageView
+import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
+import com.example.bd_mobile.R
+import com.example.bd_mobile.utils.SwipeToDeleteCallback
+import com.example.bd_mobile.ui.adapter.TaskAdapter
+import com.example.bd_mobile.data.model.Task
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var adapter: TaskAdapter
+    private lateinit var searchView: SearchView
     private val database = FirebaseDatabase.getInstance()
     private val taskReference = database.getReference("Tasks")
+    private var currentSearch = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,8 +46,49 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.filter_menu, menu);
-        return true;
+        menuInflater.inflate(R.menu.menu, menu);
+        val manager = this.getSystemService(Context.SEARCH_SERVICE) as SearchManager
+        val searchItem = menu!!.findItem(R.id.search_item)
+        val searchView = searchItem.actionView as SearchView
+        this.searchView = searchView
+
+        val searchIcon = searchView.findViewById(androidx.appcompat.R.id.search_button) as ImageView
+        searchIcon.setImageDrawable(ContextCompat.getDrawable(this,
+            R.drawable.ic_search
+        ))
+
+        searchView.queryHint = "enter your search here"
+
+        searchView.setSearchableInfo(manager.getSearchableInfo(this.componentName))
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                if (query != null) {
+                    currentSearch = query
+                    searchView.clearFocus()
+                    adapter.search(currentSearch)
+                    return true
+                }
+                return false
+            }
+
+            override fun onQueryTextChange(newSearch: String?): Boolean {
+                return if (newSearch != null) {
+                    retrieveData()
+                    currentSearch = newSearch
+                    true
+                } else {
+                    false
+                }
+            }
+        })
+
+        searchView.setOnCloseListener {
+            currentSearch = ""
+            retrieveData()
+            return@setOnCloseListener false
+        }
+        return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -106,7 +157,15 @@ class MainActivity : AppCompatActivity() {
                     val isChecked = task["isChecked"] as Boolean
                     val createdAt = task["createdAt"] as Long
                     val updatedAt = task["updatedAt"] as Long
-                    taskList.add(Task(id, name, isChecked, createdAt, updatedAt))
+                    taskList.add(
+                        Task(
+                            id,
+                            name,
+                            isChecked,
+                            createdAt,
+                            updatedAt
+                        )
+                    )
                 }
                 setupRecyclerView(taskList)
             }
@@ -159,7 +218,15 @@ class MainActivity : AppCompatActivity() {
                     val isChecked = task["isChecked"] as Boolean
                     val createdAt = task["createdAt"] as Long
                     val updatedAt = task["updatedAt"] as Long
-                    id?.let { it1 -> Task(it1, name, isChecked, createdAt, updatedAt) }
+                    id?.let { it1 ->
+                        Task(
+                            it1,
+                            name,
+                            isChecked,
+                            createdAt,
+                            updatedAt
+                        )
+                    }
                         ?.let { it2 ->
                             adapter.addItem(it2)
                         }
