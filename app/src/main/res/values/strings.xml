@@ -3,4 +3,6 @@
     <string name="filter">Filter</string>
     <string name="sort_by">Trier par :</string>
     <string name="search_place_holder">Search</string>
+    <string name="title_new_task">Crée un élément</string>
+    <string name="title_update_task">Modifier l\'élément</string>
 </resources>

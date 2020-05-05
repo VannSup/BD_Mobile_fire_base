@@ -15,6 +15,11 @@ class TaskAdapter : RecyclerView.Adapter<TaskViewHolder>() {
     lateinit var onLongTaskClickListener: (Task, Int) -> Unit
     private var sortMode = 0
 
+    public var nameDescending = true
+    public var checkedDescending = true
+    public var creationDescending = true
+    public var updateDescending = true
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
         return TaskViewHolder(
             LayoutInflater.from(parent.context)
@@ -63,25 +68,41 @@ class TaskAdapter : RecyclerView.Adapter<TaskViewHolder>() {
     }
 
     fun sortListByName() {
-        this.taskList.sortBy { it.name.toUpperCase(Locale.getDefault()) }
+        nameDescending = !nameDescending
+        if(nameDescending)
+            this.taskList.sortByDescending { it.name.toUpperCase(Locale.getDefault()) }
+        else
+            this.taskList.sortBy { it.name.toUpperCase(Locale.getDefault()) }
         notifyDataSetChanged()
         sortMode = 1
     }
 
     fun sortListByChecked() {
-        this.taskList.sortBy { !it.isChecked }
+        checkedDescending = !checkedDescending
+        if(checkedDescending)
+            this.taskList.sortByDescending { !it.isChecked }
+        else
+            this.taskList.sortBy { !it.isChecked }
         notifyDataSetChanged()
         sortMode = 2
     }
 
     fun sortListByCreation() {
-        this.taskList.sortByDescending { it.createdAt }
+        creationDescending = !creationDescending
+        if(creationDescending)
+            this.taskList.sortBy { it.createdAt }
+        else
+            this.taskList.sortByDescending { it.createdAt }
         notifyDataSetChanged()
         sortMode = 3
     }
 
     fun sortListByUpdate() {
-        this.taskList.sortByDescending { it.updatedAt }
+        updateDescending = !updateDescending
+        if(updateDescending)
+            this.taskList.sortBy { it.updatedAt }
+        else
+            this.taskList.sortByDescending { it.updatedAt }
         notifyDataSetChanged()
         sortMode = 4
     }

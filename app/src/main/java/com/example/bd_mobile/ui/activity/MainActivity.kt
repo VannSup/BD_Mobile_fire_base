@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     private val database = FirebaseDatabase.getInstance()
     private val taskReference = database.getReference("Tasks")
     private var currentSearch = ""
+    private var originalList = mutableListOf<Task>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +52,6 @@ class MainActivity : AppCompatActivity() {
         val searchItem = menu!!.findItem(R.id.search_item)
         val searchView = searchItem.actionView as SearchView
         this.searchView = searchView
-
         val searchIcon = searchView.findViewById(androidx.appcompat.R.id.search_button) as ImageView
         searchIcon.setImageDrawable(ContextCompat.getDrawable(this,
             R.drawable.ic_search
@@ -66,7 +66,6 @@ class MainActivity : AppCompatActivity() {
                 if (query != null) {
                     currentSearch = query
                     searchView.clearFocus()
-                    adapter.search(currentSearch)
                     return true
                 }
                 return false
@@ -74,8 +73,9 @@ class MainActivity : AppCompatActivity() {
 
             override fun onQueryTextChange(newSearch: String?): Boolean {
                 return if (newSearch != null) {
-                    retrieveData()
+                    adapter.setTaskList(originalList);
                     currentSearch = newSearch
+                    adapter.search(newSearch)
                     true
                 } else {
                     false
@@ -85,7 +85,7 @@ class MainActivity : AppCompatActivity() {
 
         searchView.setOnCloseListener {
             currentSearch = ""
-            retrieveData()
+            adapter.setTaskList(originalList);
             return@setOnCloseListener false
         }
         return true
@@ -94,10 +94,30 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
         val items = listOf(
-            BasicGridItem(0,"Name"),
-            BasicGridItem(0, "Checked"),
-            BasicGridItem(0, "Creation"),
-            BasicGridItem(0, "Update")
+            BasicGridItem(
+                if(adapter.nameDescending)
+                    R.drawable.ic_arrow_downward
+                else
+                    R.drawable.ic_arrow_upward
+                ,"Name"),
+            BasicGridItem(
+                if(adapter.checkedDescending)
+                    R.drawable.ic_arrow_downward
+                else
+                    R.drawable.ic_arrow_upward
+                , "Checked"),
+            BasicGridItem(
+                if(adapter.creationDescending)
+                    R.drawable.ic_arrow_downward
+                else
+                    R.drawable.ic_arrow_upward
+                , "Creation"),
+            BasicGridItem(
+                if(adapter.updateDescending)
+                    R.drawable.ic_arrow_downward
+                else
+                    R.drawable.ic_arrow_upward
+                , "Update")
         )
 
         if (item.itemId == R.id.main_toolbar_filter_icon) {
@@ -168,6 +188,8 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
                 setupRecyclerView(taskList)
+                originalList.clear()
+                originalList.addAll(taskList)
             }
 
         })
@@ -194,6 +216,7 @@ class MainActivity : AppCompatActivity() {
                 taskReference.child(task.firebaseId).updateChildren(updatedTaskMap)
                 adapter.notifyItemChanged(position)
             }
+            title(R.string.title_update_task)
         }
 
     }
@@ -231,6 +254,7 @@ class MainActivity : AppCompatActivity() {
                             adapter.addItem(it2)
                         }
                 }
+                title(R.string.title_new_task)
             }
         }
     }
