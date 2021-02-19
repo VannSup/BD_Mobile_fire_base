@@ -5,7 +5,10 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,21 +18,23 @@ import com.afollestad.materialdialogs.bottomsheets.BasicGridItem
 import com.afollestad.materialdialogs.bottomsheets.BottomSheet
 import com.afollestad.materialdialogs.bottomsheets.gridItems
 import com.afollestad.materialdialogs.input.input
+import com.example.bd_mobile.R
+import com.example.bd_mobile.data.model.Task
+import com.example.bd_mobile.ui.adapter.TaskAdapter
+import com.example.bd_mobile.utils.SwipeToDeleteCallback
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_main.*
-import android.widget.ImageView
-import androidx.appcompat.widget.SearchView
-import androidx.core.content.ContextCompat
-import com.example.bd_mobile.R
-import com.example.bd_mobile.utils.SwipeToDeleteCallback
-import com.example.bd_mobile.ui.adapter.TaskAdapter
-import com.example.bd_mobile.data.model.Task
 
 
 class MainActivity : AppCompatActivity() {
+    var firestoreDatabase : FirebaseFirestore = FirebaseFirestore.getInstance()
 
     private lateinit var adapter: TaskAdapter
     private lateinit var searchView: SearchView
@@ -53,9 +58,12 @@ class MainActivity : AppCompatActivity() {
         val searchView = searchItem.actionView as SearchView
         this.searchView = searchView
         val searchIcon = searchView.findViewById(androidx.appcompat.R.id.search_button) as ImageView
-        searchIcon.setImageDrawable(ContextCompat.getDrawable(this,
-            R.drawable.ic_search
-        ))
+        searchIcon.setImageDrawable(
+            ContextCompat.getDrawable(
+                this,
+                R.drawable.ic_search
+            )
+        )
 
         searchView.queryHint = "enter your search here"
 
@@ -95,29 +103,29 @@ class MainActivity : AppCompatActivity() {
 
         val items = listOf(
             BasicGridItem(
-                if(adapter.nameDescending)
+                if (adapter.nameDescending)
                     R.drawable.ic_arrow_downward
                 else
-                    R.drawable.ic_arrow_upward
-                ,"Name"),
+                    R.drawable.ic_arrow_upward, "Name"
+            ),
             BasicGridItem(
-                if(adapter.checkedDescending)
+                if (adapter.checkedDescending)
                     R.drawable.ic_arrow_downward
                 else
-                    R.drawable.ic_arrow_upward
-                , "Checked"),
+                    R.drawable.ic_arrow_upward, "Checked"
+            ),
             BasicGridItem(
-                if(adapter.creationDescending)
+                if (adapter.creationDescending)
                     R.drawable.ic_arrow_downward
                 else
-                    R.drawable.ic_arrow_upward
-                , "Creation"),
+                    R.drawable.ic_arrow_upward, "Creation"
+            ),
             BasicGridItem(
-                if(adapter.updateDescending)
+                if (adapter.updateDescending)
                     R.drawable.ic_arrow_downward
                 else
-                    R.drawable.ic_arrow_upward
-                , "Update")
+                    R.drawable.ic_arrow_upward, "Update"
+            )
         )
 
         if (item.itemId == R.id.main_toolbar_filter_icon) {
@@ -235,6 +243,21 @@ class MainActivity : AppCompatActivity() {
                     task["createdAt"] = System.currentTimeMillis()
                     task["updatedAt"] = System.currentTimeMillis()
                     val taskRef = taskReference.push()
+                    /*
+                    firestoreDatabase.collection("Tasks").add(task)
+                        .addOnSuccessListener(OnSuccessListener<DocumentReference> { documentReference ->
+                            adapter.addItem(Task(
+                                documentReference.id,
+                                text.toString(),
+                                false,
+                                System.currentTimeMillis(),
+                                System.currentTimeMillis()
+                            ))
+                        })
+                        .addOnFailureListener(OnFailureListener { e ->
+
+                        })
+                    */
                     taskRef.setValue(task)
                     val id = taskRef.key
                     val name = task["name"] as String
