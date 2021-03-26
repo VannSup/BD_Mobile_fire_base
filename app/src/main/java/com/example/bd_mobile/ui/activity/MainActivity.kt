@@ -34,8 +34,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
-    var firestoreDatabase : FirebaseFirestore = FirebaseFirestore.getInstance()
-
     private lateinit var adapter: TaskAdapter
     private lateinit var searchView: SearchView
     private val database = FirebaseDatabase.getInstance()
@@ -243,21 +241,6 @@ class MainActivity : AppCompatActivity() {
                     task["createdAt"] = System.currentTimeMillis()
                     task["updatedAt"] = System.currentTimeMillis()
                     val taskRef = taskReference.push()
-                    /*
-                    firestoreDatabase.collection("Tasks").add(task)
-                        .addOnSuccessListener(OnSuccessListener<DocumentReference> { documentReference ->
-                            adapter.addItem(Task(
-                                documentReference.id,
-                                text.toString(),
-                                false,
-                                System.currentTimeMillis(),
-                                System.currentTimeMillis()
-                            ))
-                        })
-                        .addOnFailureListener(OnFailureListener { e ->
-
-                        })
-                    */
                     taskRef.setValue(task)
                     val id = taskRef.key
                     val name = task["name"] as String
